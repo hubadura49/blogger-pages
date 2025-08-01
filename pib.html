@@ -1,0 +1,53 @@
+<!-- Файл: sitemap.html -->
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>sitemap.xml</title>
+  <style>body { white-space: pre; font-family: monospace; }</style>
+</head>
+<body>
+<pre id="output">Завантаження...</pre>
+
+<script>
+const blogUrl = 'https://pibodi-games.blogspot.com/?m=0'; // ← заміни на свою адресу
+const feedUrl = blogUrl + '/feeds/posts/default?alt=json&max-results=999';
+
+function escapeXml(unsafe) {
+  return unsafe.replace(/[<>&'"]/g, c => {
+    return {'<':'&lt;','>':'&gt;','&':'&amp;','\'':'&apos;','"':'&quot;'}[c];
+  });
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return d.toISOString().split('T')[0];
+}
+
+fetch(feedUrl)
+  .then(r => r.json())
+  .then(data => {
+    const entries = data.feed.entry || [];
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+    for (const e of entries) {
+      const link = e.link.find(l => l.rel === 'alternate').href + '?m=0';
+      const date = formatDate(e.updated.$t);
+      xml += `  <url>\n`;
+      xml += `    <loc>${escapeXml(link)}</loc>\n`;
+      xml += `    <lastmod>${date}</lastmod>\n`;
+      xml += `    <changefreq>weekly</changefreq>\n`;
+      xml += `    <priority>0.8</priority>\n`;
+      xml += `  </url>\n`;
+    }
+
+    xml += `</urlset>`;
+    document.getElementById('output').textContent = xml;
+  })
+  .catch(e => {
+    document.getElementById('output').textContent = 'Помилка: ' + e;
+  });
+</script>
+</body>
+</html>
