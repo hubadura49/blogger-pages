@@ -1,33 +1,28 @@
 name: 🗺️ Автооновлення sitemap.xml
 
 on:
-  workflow_dispatch:   # вручну
+  workflow_dispatch:
   schedule:
-    - cron: '0 2 * * *'  # щодня о 2:00 ночі (UTC)
+    - cron: '0 2 * * *'
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🔽 Клон репозиторій
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: ⚙️ Встановити Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: 20
 
-      - name: 📦 Встановити залежності (нічого немає)
-        run: npm init -y
+      - run: npm init -y
 
-      - name: 🧠 Запустити генерацію sitemap.xml
-        run: node generate-sitemap.js
+      - run: node generate-sitemap.js
 
-      - name: 💾 Закомітити та запушити sitemap.xml
-        run: |
+      - run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add sitemap.xml
-          git commit -m "🔄 Автооновлення sitemap.xml" || echo "Немає змін"
+          git commit -m "🔄 Автооновлення sitemap.xml" || echo "No changes"
           git push
