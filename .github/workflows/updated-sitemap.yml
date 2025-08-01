@@ -8,4 +8,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - run: echo "Цей workflow працює!"
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - run: npm init -y
+
+      - run: node generate-sitemap.js
+
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sitemap.xml
+          git commit -m "🔄 Автооновлення sitemap.xml" || echo "No changes"
+          git push
