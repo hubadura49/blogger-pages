@@ -11,9 +11,19 @@ const SITEMAP_FILE = "sitemap.xml";
     if (!res.ok) throw new Error("Can't fetch Blogger sitemap");
     const xml = await res.text();
 
-    const urls = Array.from(xml.matchAll(/<loc>(.*?)<\/loc>/g)).map(match =>
-      match[1].replace(/\?m=1$/, "?m=0")
-    );
+    const urls = Array.from(xml.matchAll(/<loc>(.*?)<\/loc>/g)).map(match => {
+  let url = match[1];
+  // Якщо URL не закінчується на '?m=0' і не має параметрів - додаємо '?m=0'
+  if (!url.endsWith('?m=0')) {
+    if (url.includes('?')) {
+      // Якщо є інші параметри, додаємо '&m=0'
+      url += '&m=0';
+    } else {
+      url += '?m=0';
+    }
+  }
+  return url;
+});
 
     const sitemapXml =
       `<?xml version="1.0" encoding="UTF-8"?>\n` +
