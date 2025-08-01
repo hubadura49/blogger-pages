@@ -1,52 +1,34 @@
-// generate-sitemap.js
-
 const fs = require("fs");
-const https = require("https");
+const fetch = require("node-fetch");
+const cheerio = require("cheerio");
 
-const BLOG_FEED = "https://pibodi-games.blogspot.com/feeds/posts/default?alt=json&max-results=500";
+const BLOG_URL = "https://pibodi-games.blogspot.com"; // заміни на свій блог
 const SITEMAP_FILE = "sitemap.xml";
 
-function escapeXml(unsafe) {
-  return unsafe.replace(/[<>&'"]/g, c => {
-    return {'<':'&lt;', '>':'&gt;', '&':'&amp;', '\'':'&apos;', '"':'&quot;'}[c];
-  });
-}
+(async () => {
+  try {
+    const res = await fetch(`${BLOG_URL}/sitemap.xml`);
+    if (!res.ok) throw new Error("Can't fetch Blogger sitemap");
+    const xml = await res.text();
 
-function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  return d.toISOString().split('T')[0];
-}
+    const urls = Array.from(xml.matchAll(/<loc>(.*?)<\/loc>/g)).map(match =>
+      match[1].replace(/\?m=1$/, "?m=0")
+    );
 
-https.get(BLOG_FEED, (res) => {
-  let data = "";
+    const sitemapXml =
+      `<?xml version="1.0" encoding="UTF-8"?>\n` +
+      `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+      urls
+        .map(
+          url => `  <url>\n    <loc>${url}</loc>\n  </url>`
+        )
+        .join("\n") +
+      `\n</urlset>`;
 
-  res.on("data", (chunk) => {
-    data += chunk;
-  });
-
-  res.on("end", () => {
-    const json = JSON.parse(data);
-    const entries = json.feed.entry || [];
-
-    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
-
-    for (const entry of entries) {
-      const link = entry.link.find(l => l.rel === "alternate").href + "?m=0";
-      const updated = formatDate(entry.updated.$t);
-      xml += `  <url>\n`;
-      xml += `    <loc>${escapeXml(link)}</loc>\n`;
-      xml += `    <lastmod>${updated}</lastmod>\n`;
-      xml += `    <changefreq>weekly</changefreq>\n`;
-      xml += `    <priority>0.8</priority>\n`;
-      xml += `  </url>\n`;
-    }
-
-    xml += `</urlset>\n`;
-
-    fs.writeFileSync(SITEMAP_FILE, xml);
-    console.log("✅ sitemap.xml створено!");
-  });
-}).on("error", (err) => {
-  console.error("Помилка запиту:", err.message);
-});
+    fs.writeFileSync(SITEMAP_FILE, sitemapXml, "utf8");
+    console.log("✅ Sitemap generated.");
+  } catch (err) {
+    console.error("❌ Error:", err);
+    process.exit(254);
+  }
+})();
