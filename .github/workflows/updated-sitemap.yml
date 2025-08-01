@@ -1,0 +1,11 @@
+name: 🗺️ Автооновлення sitemap.xml
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - run: echo "Цей workflow працює!"
