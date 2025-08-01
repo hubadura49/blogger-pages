@@ -17,7 +17,9 @@ jobs:
           node-version: 18
 
       - name: 📦 Встановити залежності
-        run: npm install node-fetch@2 cheerio
+        run: |
+          npm init -y
+          npm install node-fetch@2 cheerio
 
       - name: ⚙️ Запустити генерацію sitemap.xml
         run: node generate-sitemap.js
