@@ -1,7 +1,12 @@
 name: 🗺️ Автооновлення sitemap.xml
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:             # дозволяє ручний запуск (залишаємо)
+  schedule:                      # запускає щодня о 00:00 UTC
+    - cron: '0 0 * * *'
+  push:                          # запускає при кожному push у гілку main
+    branches:
+      - main
 
 jobs:
   generate-sitemap:
