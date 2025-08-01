@@ -4,27 +4,28 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest  # ← ОБОВʼЯЗКОВО!
+  generate-sitemap:
+    runs-on: ubuntu-latest
+
     steps:
       - name: 🔽 Клонувати репозиторій
         uses: actions/checkout@v3
 
-      - name: 🧠 Встановити Node.js
+      - name: 🟢 Встановити Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
       - name: 📦 Встановити залежності
-        run: npm install
+        run: npm install node-fetch@2 cheerio
 
       - name: ⚙️ Запустити генерацію sitemap.xml
         run: node generate-sitemap.js
 
       - name: 💾 Закомітити sitemap.xml
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name 'GitHub Actions Bot'
+          git config --global user.email 'actions@github.com'
           git add sitemap.xml
-          git diff --cached --quiet || git commit -m "🔄 Автооновлення sitemap.xml"
+          git commit -m "🔄 Автоматичне оновлення sitemap.xml" || echo "No changes to commit"
           git push
