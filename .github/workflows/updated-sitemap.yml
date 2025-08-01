@@ -8,15 +8,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🔽 Клонувати репозиторій
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: 🟢 Встановити Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
+      - name: 🧹 Очистити node_modules та кеш npm
+        run: |
+          rm -rf node_modules package-lock.json
+          npm cache clean --force
 
-      - name: 📦 Встановити залежності
+      - name: 📦 Ініціалізація та встановлення залежностей
         run: |
           npm init -y
           npm install node-fetch@2 cheerio
